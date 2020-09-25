@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Anaconda.  If not, see <http://www.gnu.org/licenses/>.
 
-from Loader import DataLoader
+from Bytereader import checkDefault
 from Chunks.Key import Key
-from Bytereader import ByteReader, checkDefault
+from Loader import DataLoader
 
 controlTypes = [
     'Joystick 1',
@@ -27,19 +27,22 @@ controlTypes = [
     'Keyboard'
 ]
 
+
 class Controls(DataLoader):
     controls = None
+
     def initialize(self):
         self.controls = []
 
     def read(self, reader):
         self.controls = [self.new(PlayerControl, reader)
-            for _ in xrange(reader.readInt())]
+                         for _ in xrange(reader.readInt())]
 
     def write(self, reader):
         reader.writeInt(len(self.controls))
         for control in self.controls:
             control.write(reader)
+
 
 class PlayerControl(DataLoader):
     controlType = None
@@ -65,7 +68,7 @@ class PlayerControl(DataLoader):
 
     def read(self, reader):
         self.controlType = reader.readInt()
-        count = reader.readInt(True) # 16
+        count = reader.readInt(True)  # 16
         checkDefault(reader, count, 16)
         self.up = Key(reader.readInt())
         self.down = Key(reader.readInt())
@@ -79,7 +82,7 @@ class PlayerControl(DataLoader):
             checkDefault(reader, reader.readInt(), 0)
 
     def getControlType(self):
-        return controlTypes[self.controlType-1]
+        return controlTypes[self.controlType - 1]
 
     def write(self, reader):
         reader.writeInt(self.controlType)

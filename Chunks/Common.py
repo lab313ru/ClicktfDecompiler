@@ -1,7 +1,6 @@
 import byteflag
 from CTF_ByteIO import ByteIO
 
-
 from Loader import DataLoader
 
 EXTENSION_BASE = 32
@@ -22,7 +21,7 @@ class Rectangle(DataLoader):
         self.right = reader.read_int32()
         self.bottom = reader.read_int32()
 
-    def write(self, reader:ByteIO):
+    def write(self, reader: ByteIO):
         reader.write_int32(self.left)
         reader.write_int32(self.top)
         reader.write_int32(self.right)
@@ -77,7 +76,6 @@ def get_qualifier(object_info):
     return object_info & 0b11111111111
 
 
-
 def get_type(self):
     if self.object_type < EXTENSION_BASE:
         return self.object_type
@@ -97,7 +95,7 @@ class AceCommon(DataLoader):
     def get_name(self):
         if self.name is None:
             self.name = get_name(self.object_type, self.num,
-                                self.systemDict, self.extensionDict)
+                                 self.systemDict, self.extensionDict)
         return self.name
 
     def get_type(self):

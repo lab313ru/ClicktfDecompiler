@@ -1,5 +1,3 @@
-import os
-
 from CTF_ByteIO import ByteIO
 from Loader import DataLoader
 
@@ -32,6 +30,7 @@ class OtherExtensions(DataLoader):
         print(f'count: {self.item_count}')
         for item in self.items:
             print(f'\t{item}')
+
     def read(self):
         reader = self.reader
         self.item_count = reader.read_uint16()
@@ -40,9 +39,7 @@ class OtherExtensions(DataLoader):
             self.items.append(item)
 
 
-
 class Extension(DataLoader):
-
 
     def __init__(self, reader: ByteIO):
         self.reader = reader
@@ -54,7 +51,7 @@ class Extension(DataLoader):
         self.versionLS = None
         self.versionMS = None
         self.loaded = None
-        
+
     def read(self):
         reader = self.reader
         size = self.reader.read_int16()
@@ -67,29 +64,22 @@ class Extension(DataLoader):
         self.name, self.extension = self.reader.read_wide_string().split('.')
         self.subType = self.reader.read_wide_string()
 
-
-
-
     def __repr__(self):
         return str(self.__dict__)
 
 
 class ExtensionList(DataLoader):
-    
 
     def __init__(self, reader: ByteIO):
         self.reader = reader
         self.items = []
         self.preload_extensions = None
-        
+
     def read(self):
         number_of_extensions = self.reader.read_int16()
         self.preload_extensions = self.reader.read_int16()
-        if self.settings.get('VERBOSE',False):
+        if self.settings.get('VERBOSE', False):
             print(f'Found ExtensionList with {number_of_extensions} extensions, preload:{self.preload_extensions}')
         self.items = [Extension(self.reader)
                       for _ in range(number_of_extensions)]
         [i.read() for i in self.items]
-
-
-

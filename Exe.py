@@ -15,32 +15,32 @@
 # You should have received a copy of the GNU General Public License
 # along with Anaconda.  If not, see <http://www.gnu.org/licenses/>.
 
-from Loader import DataLoader
-from Bytereader import ByteReader
-from CTFPackData import PackData, PACK_HEADER
-from CTFGameData import GameData, GAME_HEADER
-#from Chunk import ChunkList
+from CTFGameData import GameData
+from CTFPackData import PackData
+# from Chunk import ChunkList
 from ChunkList import *
 from Pe import findAppendedOffset
+
 
 class ExecutableData(DataLoader):
     executable = None
     packData = None
     gameData = None
+
     def read(self, reader):
         entryPoint = findAppendedOffset(reader)
         reader.seek(0)
         self.executable = reader.read(entryPoint)
-        
+
         firstShort = reader.readShort()
         reader.rewind(2)
-        
+
         pameMagic = reader.read(4)
         reader.rewind(4)
-        
+
         packMagic = reader.read(8)
         reader.rewind(8)
-        
+
         if firstShort == 8748:
             self.settings['old'] = True
             packData = self.new(ChunkList, reader)
@@ -54,7 +54,7 @@ class ExecutableData(DataLoader):
             raise Exception('invalid packheader')
         self.packData = packData
         self.gameData = self.new(GameData, reader)
-        
+
     def write(self, reader):
         reader.write(self.executable)
         self.packData.write(reader)

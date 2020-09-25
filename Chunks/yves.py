@@ -70,7 +70,7 @@ class AppIcon(DataLoader):
                 else:
                     # is opaque
                     self.alpha.append(255)
-        if self.settings.get('DUMPICON',False) or self.settings.get('DUMPEVERYTHING',False):
+        if self.settings.get('DUMPICON', False) or self.settings.get('DUMPEVERYTHING', False):
             self.dump()
 
     def dump(self):

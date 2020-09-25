@@ -52,7 +52,7 @@ class AppMenuItem(DataLoader):
                 self.mnemonic = self.name[index + 1].upper()
         self.name = self.name.replace('&', '')
 
-    def print(self,indent = 1):
+    def print(self, indent=1):
         ind = '\t' * indent if indent else ''
         print(f'{ind}Name: {self.name}')
         print(f'{ind}Flags: {self.flags}')
@@ -106,7 +106,6 @@ class AppMenu(DataLoader):
             if byteflag.getFlag(new_item.flags, 7):
                 break
 
-
     def print(self):
         print(f'Header size: {self.header_size}')
         print(f'Menu offset: {self.menu_offset}')
@@ -117,4 +116,3 @@ class AppMenu(DataLoader):
         for item in self.items:
             item.print()
             print()
-

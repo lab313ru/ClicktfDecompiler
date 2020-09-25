@@ -71,7 +71,7 @@ class Qualifier(DataLoader, ObjectInfoMixin):
         objects = self.objects = []
         for item in frameItems.items:
             try:
-                if  self.qualifier not in item.properties.loader.qualifiers:
+                if self.qualifier not in item.properties.loader.qualifiers:
                     continue
                 if item.objectType != self.type:
                     continue
@@ -96,10 +96,10 @@ class Parameter(DataLoader):
         current_position = reader.tell()
         size = reader.read_int16()
         self.code = reader.read_int16()
-        print(self.code,len(parameter_loaders))
+        print(self.code, len(parameter_loaders))
         self.loader = parameter_loaders[self.code]
         if self.loader:
-            print('Parameter loader',self.loader)
+            print('Parameter loader', self.loader)
             self.loader = self.loader(reader)
             self.loader.read()
         reader.seek(current_position + size)
@@ -132,7 +132,7 @@ class Action(AceCommon):
     def read(self):
         reader = self.reader
         current_position = reader.tell()
-        size = 50 #reader.read_uint16()
+        size = 50  # reader.read_uint16()
         self.object_type = reader.read_int16()
         self.num = reader.read_int16()
         self.object_info = reader.read_uint16()
@@ -876,9 +876,8 @@ conditions_extension_dict = {
     -43: 'CompareAlterableValueDouble'
 }
 
-
 if __name__ == '__main__':
     reader = ByteIO(path=r"E:\PYTHON_STUFF\CTF_ReaderV2\DUMP\customnight\CHUNKS\FRAMES\Frame 21\FRAMEEVENTS.chunk")
     e = Events(reader)
-    e.update_settings(build = 290)
+    e.update_settings(build=290)
     e.read()

@@ -15,21 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Anaconda.  If not, see <http://www.gnu.org/licenses/>.
 
-#from cStringIO import StringIO
-from io import BytesIO
-from io import StringIO
 import struct
 import subprocess
-import os
-import traceback
 import sys
 import tempfile
-import urllib
-import json
-import gzip
-from urllib.parse import urlencode
-from urllib.request import Request
-
+import traceback
+# from cStringIO import StringIO
+from io import StringIO
 
 BYTE = struct.Struct('b')
 UBYTE = struct.Struct('B')
@@ -40,66 +32,67 @@ DOUBLE = struct.Struct('d')
 INT = struct.Struct('i')
 UINT = struct.Struct('I')
 
+
 class ByteReader(object):
     buffer = None
     lastPosition = None
 
-    def __init__(self, input = None, fp = None, file= None):
+    def __init__(self, input=None, fp=None, file=None):
         if isinstance(input, type(file)):
-           buffer = str(StringIO(input))
-           self.write = buffer.write
-			
+            buffer = str(StringIO(input))
+            self.write = buffer.write
+
         else:
             if input is not None:
                 buffer = input
             else:
                 buffer = StringIO()
                 self.write = buffer.write
-            self.data = buffer 
-			#.getvalue
+            self.data = buffer
+        # .getvalue
 
         self.buffer = buffer
         self.tell = buffer.tell
 
         self.lastPosition = self.tell()
-    
+
     def data(self):
         currentPosition = self.tell()
         self.seek(0)
         data = self.read()
         self.seek(currentPosition)
         return data
-    
+
     def seek(self, *arg, **kw):
         self.buffer.seek(*arg, **kw)
         self.lastPosition = self.tell()
-    
+
     def read(self, *arg, **kw):
         self.lastPosition = self.tell()
         return self.buffer.read(*arg, **kw)
-    
+
     def size(self):
         currentPosition = self.tell()
         self.seek(0, 2)
         size = self.tell()
         self.seek(currentPosition)
         return size
-    
+
     def __len__(self):
         return self.size()
-    
+
     def __str__(self):
         return self.data()
-    
+
     def __repr__(self):
         return repr(str(self))
 
-    def readByte(self, asUnsigned = False):
+    def readByte(self, asUnsigned=False):
         format = UBYTE if asUnsigned else BYTE
         value, = self.readStruct(format)
         return value
-        
-    def readShort(self, asUnsigned = False):
+
+    def readShort(self, asUnsigned=False):
         format = USHORT if asUnsigned else SHORT
         value, = self.readStruct(format)
         return value
@@ -111,13 +104,13 @@ class ByteReader(object):
     def readDouble(self):
         value, = self.readStruct(DOUBLE)
         return value
-        
-    def readInt(self, asUnsigned = False):
+
+    def readInt(self, asUnsigned=False):
         format = UINT if asUnsigned else INT
         value, = self.readStruct(format)
         return value
-        
-    def readString(self, size = None):
+
+    def readString(self, size=None):
         if size is not None:
             return self.readReader(size).readString()
         currentPosition = self.tell()
@@ -129,7 +122,7 @@ class ByteReader(object):
             store = ''.join([store, readChar])
         self.lastPosition = currentPosition
         return store
-        
+
     def readUnicodeString(self):
         currentPosition = self.tell()
         startPos = self.tell()
@@ -143,7 +136,7 @@ class ByteReader(object):
         self.skipBytes(2)
         self.lastPosition = currentPosition
         return data.decode('utf-16-le')
-        
+
     def readColor(self):
         currentPosition = self.tell()
         r = self.readByte(True)
@@ -152,7 +145,7 @@ class ByteReader(object):
         self.skipBytes(1)
         self.lastPosition = currentPosition
         return (r, g, b)
-    
+
     def readReader(self, size):
         reader = ByteReader()
         reader.write(self.read(size))
@@ -162,15 +155,15 @@ class ByteReader(object):
     def readFormat(self, format):
         size = struct.calcsize(format)
         return struct.unpack(format, self.read(size))
-    
+
     def readStruct(self, structType):
         return structType.unpack(self.read(structType.size))
-        
-    def writeByte(self, value, asUnsigned = False):
+
+    def writeByte(self, value, asUnsigned=False):
         format = UBYTE if asUnsigned else BYTE
         self.writeStruct(format, value)
-        
-    def writeShort(self, value, asUnsigned = False):
+
+    def writeShort(self, value, asUnsigned=False):
         format = USHORT if asUnsigned else SHORT
         self.writeStruct(format, value)
 
@@ -179,48 +172,48 @@ class ByteReader(object):
 
     def writeDouble(self, value):
         self.writeStruct(DOUBLE, value)
-        
-    def writeInt(self, value, asUnsigned = False):
+
+    def writeInt(self, value, asUnsigned=False):
         format = UINT if asUnsigned else INT
         self.writeStruct(format, value)
-        
+
     def writeString(self, value):
         self.write(value + "\x00")
-        
+
     def writeUnicodeString(self, value):
         self.write(value.encode('utf-16-le') + "\x00\x00")
-        
+
     def writeColor(self, colorTuple):
         r, g, b = colorTuple
         self.writeByte(r, True)
         self.writeByte(g, True)
         self.writeByte(b, True)
         self.writeByte(0)
-        
+
     def writeFormat(self, format, *values):
         self.write(struct.pack(format, *values))
-    
+
     def writeStruct(self, structType, *values):
         self.write(structType.pack(*values))
-        
+
     def writeReader(self, reader):
         self.write(reader.data())
-        
+
     def skipBytes(self, n):
         self.seek(n, 1)
-        
+
     def rewind(self, n):
         self.seek(-n, 1)
-    
+
     def truncate(self, value):
         self.buffer.truncate(value)
-    
+
     def checkDefault(self, *arg, **kw):
         return checkDefault(self, *arg, **kw)
-    
+
     def openEditor(self):
         if not hasattr(self.buffer, 'name'):
-            fp = tempfile.NamedTemporaryFile('wb', delete = False)
+            fp = tempfile.NamedTemporaryFile('wb', delete=False)
             fp.write(self.data())
             fp.close()
             name = fp.name
@@ -235,16 +228,18 @@ class ByteReader(object):
             pass
         raw_input('(enter)')
 
+
 def openEditor(filename, position):
     return subprocess.Popen(['010editor', '%s@%s' % (filename, position)])
-        
+
+
 def checkDefault(reader, value, *defaults):
     size = reader.tell() - reader.lastPosition
     reprDefaults = defaults
     if len(defaults) == 1:
         reprDefaults, = defaults
     message = ('unimplemented value at %s, size %s (should be '
-        '%s but was %s)' % (reader.lastPosition, size, reprDefaults, value))
+               '%s but was %s)' % (reader.lastPosition, size, reprDefaults, value))
     if value in defaults:
         return
     traceback.print_stack(file=sys.stdout)

@@ -15,15 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Anaconda.  If not, see <http://www.gnu.org/licenses/>.
 
-from Loader import DataLoader
-from Bytereader import ByteReader
-#from mmfparser.data.chunkloaders.parameters.names import getName
-#from mmfparser.data.chunkloaders.expressions.loader import Expression
-from Chunks.Key import Key
-from bitdict import BitDict
 from Chunks.CommonOth import (_ObjectInfoMixin,
-    _ObjectTypeMixin)
-#from mmfparser.data.font import LogFont
+                              _ObjectTypeMixin)
+# from mmfparser.data.chunkloaders.parameters.names import getName
+# from mmfparser.data.chunkloaders.expressions.loader import Expression
+from Chunks.Key import Key
+from Loader import DataLoader
+from bitdict import BitDict
+
+# from mmfparser.data.font import LogFont
 
 EQUAL = 0
 DIFFERENT = 1
@@ -41,6 +41,7 @@ OPERATOR_LIST = [
     '>'
 ]
 
+
 def getAttributes(loader):
     attributeDict = {}
     for k in dir(loader):
@@ -54,8 +55,10 @@ def getAttributes(loader):
         attributeDict[k] = v
     return attributeDict
 
+
 class ParameterCommon(DataLoader):
     isExpression = False
+
 
 class Object(ParameterCommon, _ObjectInfoMixin, _ObjectTypeMixin):
     objectInfoList = None
@@ -72,6 +75,7 @@ class Object(ParameterCommon, _ObjectInfoMixin, _ObjectTypeMixin):
         reader.writeShort(self.objectInfo, True)
         reader.writeShort(self.objectType)
 
+
 class Time(ParameterCommon):
     timer = None
     loops = None
@@ -84,6 +88,7 @@ class Time(ParameterCommon):
         reader.writeInt(self.timer)
         reader.writeInt(self.loops)
 
+
 class Short(ParameterCommon):
     value = None
 
@@ -93,13 +98,14 @@ class Short(ParameterCommon):
     def write(self, reader):
         reader.writeShort(self.value)
 
+
 class Remark(ParameterCommon):
     def read(self, reader):
-        self.font = self.new(LogFont, reader, old = True)
+        self.font = self.new(LogFont, reader, old=True)
         self.fontColor = reader.readColor()
         self.backColor = reader.readColor()
         if reader.readShort() != 0:
-            print ('remark NOOO')
+            print('remark NOOO')
         self.id = reader.readInt(True)
 
     def write(self, reader):
@@ -109,6 +115,7 @@ class Remark(ParameterCommon):
         reader.writeShort(0)
         reader.writeInt(self.id)
 
+
 class Int(ParameterCommon):
     value = None
 
@@ -117,6 +124,7 @@ class Int(ParameterCommon):
 
     def write(self, reader):
         reader.writeInt(self.value)
+
 
 SAMPLE_FLAGS = BitDict(
     'Uninterruptible',
@@ -143,6 +151,7 @@ class Sample(ParameterCommon):
         reader.writeShort(self.flags.getFlags(), True)
         reader.writeString(self.name)
 
+
 class Create(ParameterCommon):
     objectInstance = None
     objectInfo = None
@@ -151,7 +160,7 @@ class Create(ParameterCommon):
         self.position = self.new(Position, reader)
         self.objectInstance = reader.readShort(True)
         self.objectInfo = reader.readShort(True)
-        reader.skipBytes(4) # free
+        reader.skipBytes(4)  # free
 
     def write(self, reader):
         self.position.write(reader)
@@ -159,16 +168,18 @@ class Create(ParameterCommon):
         reader.writeShort(self.objectInfo, True)
         reader.write('\x00' * 4)
 
+
 class Every(ParameterCommon):
     delay = None
 
     def read(self, reader):
-        self.delay = reader.readInt() # in ms
+        self.delay = reader.readInt()  # in ms
         self.compteur = reader.readInt()
 
     def write(self, reader):
         reader.writeInt(self.delay)
         reader.writeInt(self.compteur)
+
 
 class KeyParameter(ParameterCommon):
     key = None
@@ -178,6 +189,7 @@ class KeyParameter(ParameterCommon):
 
     def write(self, reader):
         reader.writeShort(self.key.getValue())
+
 
 class ExpressionParameter(ParameterCommon):
     isExpression = True
@@ -204,6 +216,7 @@ class ExpressionParameter(ParameterCommon):
     def getOperator(self):
         return OPERATOR_LIST[self.comparison]
 
+
 POSITION_FLAGS = BitDict(
     # Located flag
     # True: transform position according to the direction of parent
@@ -217,6 +230,7 @@ POSITION_FLAGS = BitDict(
     # True: use default movement direction
     'DefaultDirection'
 )
+
 
 class Position(ParameterCommon):
     objectInfoParent = None
@@ -257,6 +271,7 @@ class Position(ParameterCommon):
         reader.writeShort(self.objectInfoList)
         reader.writeShort(self.layer)
 
+
 class Shoot(ParameterCommon):
     position = None
     objectInstance = None
@@ -267,7 +282,7 @@ class Shoot(ParameterCommon):
         self.position = self.new(Position, reader)
         self.objectInstance = reader.readShort(True)
         self.objectInfo = reader.readShort(True)
-        reader.skipBytes(4) # free
+        reader.skipBytes(4)  # free
         self.shootSpeed = reader.readShort()
 
     def write(self, reader):
@@ -276,6 +291,7 @@ class Shoot(ParameterCommon):
         reader.writeShort(self.objectInfo, True)
         reader.write('\x00' * 4)
         reader.writeShort(self.shootSpeed)
+
 
 class Zone(ParameterCommon):
     x1 = None
@@ -295,6 +311,7 @@ class Zone(ParameterCommon):
         reader.writeShort(self.x2)
         reader.writeShort(self.y2)
 
+
 class Colour(ParameterCommon):
     value = None
 
@@ -304,10 +321,12 @@ class Colour(ParameterCommon):
     def write(self, reader):
         reader.writeColor(self.value)
 
+
 PROGRAM_FLAGS = BitDict(
     'Wait',
     'Hide'
 )
+
 
 class Program(ParameterCommon):
     flags = None
@@ -330,13 +349,15 @@ class Program(ParameterCommon):
         reader.write(filename + (260 - len(filename)) * '\x00')
         reader.writeString(self.command)
 
+
 GROUP_FLAGS = BitDict(
     'Inactive',
     'Closed',
     'ParentInactive',
     'GroupInactive',
-    'Global' # unicode?
+    'Global'  # unicode?
 )
+
 
 class Group(ParameterCommon):
     flags = None
@@ -360,6 +381,7 @@ class Group(ParameterCommon):
         reader.writeString(self.name, 96)
         reader.writeInt(self.password)
 
+
 class GroupPointer(ParameterCommon):
     savedPointer = None
     pointer = None
@@ -375,6 +397,7 @@ class GroupPointer(ParameterCommon):
         reader.writeInt(self.savedPointer)
         reader.writeShort(self.id)
 
+
 class String(ParameterCommon):
     value = None
 
@@ -383,6 +406,7 @@ class String(ParameterCommon):
 
     def write(self, reader):
         reader.writeString(self.value)
+
 
 class Filename(ParameterCommon):
     value = None
@@ -393,6 +417,7 @@ class Filename(ParameterCommon):
     def write(self, reader):
         value = self.value[:259]
         reader.write(value + '\x00' * (260 - len(value)))
+
 
 class CompareTime(ParameterCommon):
     timer = None
@@ -409,6 +434,7 @@ class CompareTime(ParameterCommon):
         reader.writeInt(self.loops)
         reader.writeShort(self.comparison)
 
+
 class TwoShorts(ParameterCommon):
     value1 = None
     value2 = None
@@ -421,10 +447,12 @@ class TwoShorts(ParameterCommon):
         reader.writeShort(self.value1)
         reader.writeShort(self.value2)
 
+
 class Extension(ParameterCommon):
     data = None
     type = None
     code = None
+
     def read(self, reader):
         size = reader.readShort()
         self.type = reader.readShort()
@@ -441,6 +469,7 @@ class Extension(ParameterCommon):
         reader.writeShort(self.code)
         reader.writeReader(self.data)
 
+
 LEFT_CLICK = 0
 MIDDLE_CLICK = 1
 RIGHT_CLICK = 2
@@ -450,6 +479,7 @@ CLICK_NAMES = [
     'Middle',
     'Right'
 ]
+
 
 class Click(ParameterCommon):
     double = None
@@ -466,6 +496,7 @@ class Click(ParameterCommon):
     def getButton(self):
         return CLICK_NAMES[self.click]
 
+
 class CharacterEncoding(ParameterCommon):
     def read(self, reader):
         raise NotImplementedError()
@@ -477,12 +508,14 @@ class CharacterEncoding(ParameterCommon):
     def write(self, reader):
         raise NotImplementedError()
 
+
 class Bug(ParameterCommon):
     def read(self, reader):
         pass
 
     def write(self, reader):
         pass
+
 
 parameterLoaders = [
     None,

@@ -117,6 +117,7 @@ class PlayerControl(DataLoader):
         self.reader = reader
         self.controlType = 0
         self.keys = Keys(self.reader)
+
     def read(self):
         self.controlType = self.reader.read_int16()
         self.keys.read()
@@ -124,9 +125,9 @@ class PlayerControl(DataLoader):
     def print(self, indent=2):
         ind = '\t' * indent if indent else ''
         print(f'{ind}PlayerControl:')
-        ind = '\t' * (indent+1) if indent+1 else ''
+        ind = '\t' * (indent + 1) if indent + 1 else ''
         print(f'{ind}Control type: {self.controlType}')
-        self.keys.print(indent+2)
+        self.keys.print(indent + 2)
 
     def __repr__(self):
         locald = {a: b for a, b in self.__dict__.items() if a != 'data'}
@@ -147,7 +148,7 @@ class Controls(DataLoader):
         ind = '\t' * indent if indent else ''
         print(f'{ind}Controls:')
         for control in self.items:
-            control.print(indent+1)
+            control.print(indent + 1)
 
     def __repr__(self):
         locald = {a: b for a, b in self.__dict__.items() if a != 'data'}

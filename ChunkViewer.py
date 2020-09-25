@@ -39,14 +39,13 @@ class ChunkViewer:
         print('\t pchunk or chunk to print chunk loader data')
         print('\t shell or py to run python console')
 
-
     def print_chunk(self):
         print('=====CHUNK LOADER DATA=====')
-        if hasattr(self.chunk,'print'):
-            getattr(self.chunk,'print')()
+        if hasattr(self.chunk, 'print'):
+            getattr(self.chunk, 'print')()
         else:
             for name, value in self.chunk.__dict__.items():
-                print(f'{name} : {pformat(value,indent=2,compact=True)}')
+                print(f'{name} : {pformat(value, indent=2, compact=True)}')
 
     def parse_command(self, raw_command, aliases):
         for allias in aliases:
@@ -79,8 +78,6 @@ class ChunkViewer:
             acc += '\t|\t' + char_acc
             print(acc)
 
-
-
     def run_shell(self):
         print('Local variables:')
         print('\t data - raw chunk data')
@@ -104,7 +101,7 @@ class ChunkViewer:
                     print('Exiting shell')
                     return
                 compiled_code = compile(code, "iPy", 'single')
-                exec(compiled_code,globals_,locals_)
+                exec(compiled_code, globals_, locals_)
                 self.update_locals(locals_)
                 self.update_globals(globals_)
             except KeyboardInterrupt:
@@ -112,7 +109,6 @@ class ChunkViewer:
                 return
             except Exception as ex:
                 traceback.print_exc()
-
 
     def start(self):
         while True:
@@ -124,10 +120,10 @@ class ChunkViewer:
             elif self.parse_command(command, ['exit', '-q', 'quit']):
                 break
 
-            elif self.parse_command(command, ['pchunk', '-pcnk', 'chunk','-p']):
+            elif self.parse_command(command, ['pchunk', '-pcnk', 'chunk', '-p']):
                 self.print_chunk()
 
-            elif self.parse_command(command, ['praw', 'raw','-r']):
+            elif self.parse_command(command, ['praw', 'raw', '-r']):
                 self.print_raw()
 
             elif self.parse_command(command, ['shell', 'py']):

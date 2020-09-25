@@ -46,7 +46,7 @@ class GameData(DataLoader):
     serial = None
 
     shaders = None
-	
+
     def __init__(self, reader: ByteIO):
         self.reader = reader
         self.runtime_version = None
@@ -55,7 +55,6 @@ class GameData(DataLoader):
         self.product_build = None
         self.build = None
         self.chunk_list = ChunkList(self.reader)
-
 
     def read(self):
         reader = self.reader
@@ -80,7 +79,6 @@ class GameData(DataLoader):
         self.files = None
         self.chunks = chunks
 
-
     def __repr__(self):
-        return f'<GameData {self.build} runtime version:{self.runtime_version}:{self.runtime_subversion} '\
+        return f'<GameData {self.build} runtime version:{self.runtime_version}:{self.runtime_subversion} ' \
                f'build:{self.product_build} version:{self.product_version}>'

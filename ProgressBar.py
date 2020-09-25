@@ -13,10 +13,9 @@ class ProgressBar:
         self.bg_char = bg_char
         self.fill_char = fill_char
         self.edges = edges
-        
+
         self.progress = 0
         self.center = self.length // 2
-
 
     def draw(self):
         self.bar = [self.bg_char for _ in range(self.length)]
@@ -62,4 +61,3 @@ if __name__ == '__main__':
     for _ in range(156):
         a.increment(1)
         sleep(0.05)
-

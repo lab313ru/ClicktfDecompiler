@@ -48,11 +48,11 @@ class MusicFile(DataLoader):
             self.dump()
 
     def dump(self):
-        if self.settings.get('VERBOSE',False):
+        if self.settings.get('VERBOSE', False):
             print(f'Saving "{self.name}{self.ext}"')
 
         with open(os.path.join(self.settings['dump_path'], 'MusicBank', f'{self.name}{self.ext}'), 'wb') as fp:
-                fp.write(self.data)
+            fp.write(self.data)
         return self
 
 
@@ -90,7 +90,7 @@ class MusicBank(DataLoader):
         else:
             number_of_items = reader.read_uint32()
             item_class = MusicFile
-        if self.settings.get('VERBOSE',False):
+        if self.settings.get('VERBOSE', False):
             print('Total music files:', number_of_items, 'music class:', item_class.__name__)
         for _ in range(number_of_items):
             item = item_class(reader).read()

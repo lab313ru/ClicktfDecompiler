@@ -533,7 +533,7 @@ class Click(ParameterCommon):
 
 
 class CharacterEncoding(ParameterCommon):
-    def __init__(self,reader:ByteIO):
+    def __init__(self, reader: ByteIO):
         self.reader = reader
 
     def read(self):

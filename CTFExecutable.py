@@ -1,15 +1,13 @@
 import os
 import sys
 
+from Bytereader import ByteReader
 from CTFGameData import GameData
 from CTFPackData import PackData
 from CTF_ByteIO import ByteIO
 from CTF_Constants import *
 from Loader import DataLoader
-from Bytereader import ByteReader
 from Pame2mfa import translate
-from Exe import ExecutableData
-from Mfa import MFA
 
 
 class CTFExecutale(DataLoader):
@@ -22,7 +20,6 @@ class CTFExecutale(DataLoader):
             raise Exception('Invalid executable signature')
         self.pack_data = None
         self.game_data = GameData(self.reader)
-        
 
     def parse_exe(self):
         reader = self.reader
@@ -78,6 +75,7 @@ class CTFExecutale(DataLoader):
 
         return self
         self.dumpmfa()
+
     def prepare_folders(self):
         cur_path = self.settings.get('PATH', os.path.abspath("."))
         game = self.settings.get('GAME', 'game')
@@ -87,37 +85,33 @@ class CTFExecutale(DataLoader):
         input = "F:\Games\sl\SisterLocation.exe"
         os.makedirs(os.path.join(dump_path, "LOG"), exist_ok=True)
         os.makedirs(os.path.join(dump_path, "CHUNKS"), exist_ok=True)
-        os.makedirs(os.path.join(dump_path, "CHUNKS",'OBJECTINFO'), exist_ok=True)
-        os.makedirs(os.path.join(dump_path, "CHUNKS",'FRAMES'), exist_ok=True)
+        os.makedirs(os.path.join(dump_path, "CHUNKS", 'OBJECTINFO'), exist_ok=True)
+        os.makedirs(os.path.join(dump_path, "CHUNKS", 'FRAMES'), exist_ok=True)
         os.makedirs(os.path.join(dump_path, "ImageBank"), exist_ok=True)
         os.makedirs(os.path.join(dump_path, "SoundBank"), exist_ok=True)
         os.makedirs(os.path.join(dump_path, "MusicBank"), exist_ok=True)
         os.makedirs(os.path.join(dump_path, "extensions"), exist_ok=True)
         self.dumpmfa()
-        
-		
-		
-    def dumpmfa(self):
-        fp = ByteReader(open("F:\Games\sl\SisterLocation.exe", 'rb'))	
-        #if input.endswith('.ccn'):
-        newGame = GameData(fp)
-        #else:
-            #newExe = ExecutableData(fp, loadImages=True)
 
-        newMfa = translate(newGame, print_func = "F:\Games\sl\SisterLocation.exe")
+    def dumpmfa(self):
+        fp = ByteReader(open("F:\Games\sl\SisterLocation.exe", 'rb'))
+        # if input.endswith('.ccn'):
+        newGame = GameData(fp)
+        # else:
+        # newExe = ExecutableData(fp, loadImages=True)
+
+        newMfa = translate(newGame, print_func="F:\Games\sl\SisterLocation.exe")
         out_path = os.path.join("F:\Games\sl\out.mfa")
         newMfa.write(ByteReader(open(out_path, 'wb')))
 
-       #newMfa = MFA(ByteReader(open(out_path, 'rb')))
-        print ('Finished!')
-
-		
+        # newMfa = MFA(ByteReader(open(out_path, 'rb')))
+        print('Finished!')
 
 
 if __name__ == '__main__':
     a = CTFExecutale(sys.argv[1] if len(
         sys.argv) > 1 else r"F:\Games\sl\SisterLocation.exe")
-        # sys.argv) > 1 else r"E:\SteamLibrary\steamapps\common\Ultimate Custom Night\Ultimate Custom Night.exe")
+    # sys.argv) > 1 else r"E:\SteamLibrary\steamapps\common\Ultimate Custom Night\Ultimate Custom Night.exe")
     a.update_settings(VERBOSE=True)
     a.update_settings(DUMPICON=True)
     a.update_settings(DUMPCHUNKS=True)

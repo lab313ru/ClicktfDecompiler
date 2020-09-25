@@ -43,11 +43,10 @@ class SoundItem(BaseSound):
 
     def __init__(self, reader):
         super().__init__(reader)
-        self.compressed = not self.settings.get('debug',False)
+        self.compressed = not self.settings.get('debug', False)
         self.checksum = None
         self.references = None
         self.flags = SOUND_FLAGS.copy()
-
 
     def read(self):
         reader = self.reader
@@ -121,13 +120,12 @@ class SoundBank(DataLoader):
         self.reader = reader
         self.reference_count = 0
         self.number_of_items = 0
-        self.items = [] #type: List[BaseSound]
+        self.items = []  # type: List[BaseSound]
 
     def print(self):
         print(f'\tSound count:{self.number_of_items}')
         for item in self.items:
             print(f'\t\tSound file "{item.name}" size:{prettier_size(item)}')
-
 
     def read(self):
 
@@ -160,4 +158,3 @@ class SoundBank(DataLoader):
                     self.items.append(item)
                 else:
                     del item
-

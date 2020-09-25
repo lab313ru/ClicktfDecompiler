@@ -248,8 +248,6 @@ extensionDict = {
 }
 
 
-
-
 class String(DataLoader):
     def __init__(self, reader: ByteIO):
         self.reader = reader
@@ -328,6 +326,7 @@ class ExtensionString(ExtensionCommon):
 class ExtensionValue(ExtensionCommon):
     pass
 
+
 system_loaders = {
     -1: {
         0: Long,
@@ -342,6 +341,7 @@ extensionLoaders = {
     16: ExtensionValue,
     19: ExtensionString
 }
+
 
 class Expression(AceCommon):
     def __init__(self, reader: ByteIO):

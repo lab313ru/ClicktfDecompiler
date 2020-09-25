@@ -299,18 +299,18 @@ class ImageBank(DataLoader):
     def read(self):
         reader = self.reader
         build = self.settings['build']
-        print('Reading ImageBank.',end = ' ')
+        print('Reading ImageBank.', end=' ')
         number_of_items = reader.read_uint32()
         print('Total number of images:', number_of_items)
         print('Reading Images:')
-        pbar = ProgressBar(max_progress= number_of_items)
+        pbar = ProgressBar(max_progress=number_of_items)
         for i in range(number_of_items):
             image = ImageItem(self.reader)
-            if self.settings.get('DUMPIMAGES',False) or self.settings.get('DUMPEVERYTHING',False):
+            if self.settings.get('DUMPIMAGES', False) or self.settings.get('DUMPEVERYTHING', False):
                 image.read()
             if build >= 284:
                 image.handle -= 1
-            if not self.settings.get('SAVERAM',True):
+            if not self.settings.get('SAVERAM', True):
                 self.images[image.handle] = image
             else:
                 del image

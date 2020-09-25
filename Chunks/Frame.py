@@ -2,7 +2,7 @@ import os
 from typing import List
 
 from CTF_ByteIO import ByteIO
-#from Chunks.Events import Events
+# from Chunks.Events import Events
 from Chunks.Common import Rectangle
 from Chunks.Paramerers.Parameters import Int
 from Chunks.StringChunks import StringChunk
@@ -256,7 +256,7 @@ class Frame(DataLoader):
 
         self.events = chunks.get_chunk(Events)  # type:Events
         self.maxObjects = 50000
-		#self.events.max_objects
+        # self.events.max_objects
 
         self.palette = chunks.get_chunk(FramePalette)
 

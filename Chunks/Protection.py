@@ -68,10 +68,11 @@ class Checksum(object):
 
 
 class Protection(DataLoader):
-    def __init__(self,reader:ByteIO):
+    def __init__(self, reader: ByteIO):
         self.reader = reader
         self.checksum = None
         # self.read(self.reader)
+
     def read(self):
         reader = self.reader
         self.checksum = reader.read_uint32()
@@ -79,7 +80,6 @@ class Protection(DataLoader):
     def compare_data(self, data):
         real_checksum = Checksum(data).get_checksum()
         return real_checksum == self.checksum
-
 
     def set_data(self, data):
         self.checksum = Checksum(data).get_checksum()

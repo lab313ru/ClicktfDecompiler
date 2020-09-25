@@ -21,9 +21,8 @@ With help from http://article.gmane.org/gmane.comp.python.ctypes/432
 Converted to mmfparser-esque style
 """
 
-from Bytereader import ByteReader
-from Loader import DataLoader
 from Exceptions import InvalidData
+
 
 def findAppendedOffset(reader):
     """
@@ -55,15 +54,15 @@ def findAppendedOffset(reader):
         start = reader.tell()
         name = reader.readString()
         if name == '.extra':
-            reader.seek(start+16+4)
-            pos = reader.readInt(True) # pointerToRawData
+            reader.seek(start + 16 + 4)
+            pos = reader.readInt(True)  # pointerToRawData
             break
         elif i >= numberOfSections - 1:
-            reader.seek(start+16)
-            size = reader.readInt(True) # sizeOfRawData
-            addr = reader.readInt(True) # pointerToRawData
+            reader.seek(start + 16)
+            size = reader.readInt(True)  # sizeOfRawData
+            addr = reader.readInt(True)  # pointerToRawData
             pos = addr + size
             break
-        reader.seek(start+40)
+        reader.seek(start + 40)
     reader.seek(pos)
     return reader.tell()

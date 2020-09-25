@@ -1,7 +1,3 @@
-import os
-
-import bitdict
-from Chunks.Common import ObjectTypeMixin
 from Chunks.Objects import *
 from Chunks.StringChunks import StringChunk
 from Loader import DataLoader
@@ -98,13 +94,13 @@ class ObjectEffects(DataLoader):
 
 class ObjectProperties(DataLoader, ObjectTypeMixin):
 
-
     def __init__(self, reader: ByteIO):
         self.reader = reader
         self.loader = None
         self.objectType = None
         self.isCommon = None
         self._loadReader = None
+
     def read(self, objectType=0):
         self.objectType = objectType
         reader = self.reader
@@ -121,7 +117,6 @@ class ObjectProperties(DataLoader, ObjectTypeMixin):
 
 
 class ObjectHeader(DataLoader, ObjectTypeMixin):
-
 
     def __init__(self, reader: ByteIO):
         self.reader = reader
@@ -144,7 +139,6 @@ class ObjectHeader(DataLoader, ObjectTypeMixin):
 
 class ObjectInfo(DataLoader, ObjectTypeMixin):
 
-
     def __init__(self, reader: ByteIO):
         self.reader = reader
         self.chunks = []
@@ -159,7 +153,6 @@ class ObjectInfo(DataLoader, ObjectTypeMixin):
         self.inkEffectValue = 0
         self.shaderId = 0
         self.items = 0
-
 
     def read(self):
         from ChunkList import ChunkList
@@ -194,7 +187,8 @@ class ObjectInfo(DataLoader, ObjectTypeMixin):
         for chunk in infoChunks.chunks:
             try:
                 os.makedirs(os.path.join(self.settings['dump_path'], 'CHUNKS', 'OBJECTINFO', self.name), exist_ok=True)
-                with open(os.path.join(self.settings['dump_path'], 'CHUNKS','OBJECTINFO',self.name, f'{chunk.name}.chunk'), 'wb') as fp:
+                with open(os.path.join(self.settings['dump_path'], 'CHUNKS', 'OBJECTINFO', self.name,
+                                       f'{chunk.name}.chunk'), 'wb') as fp:
                     a = chunk.raw_data
                     fp.write(a)
             except:

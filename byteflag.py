@@ -19,6 +19,7 @@
 Perfom flag operations on numbers.
 """
 
+
 def listFlag(flaglist):
     """
     Takes a list of bools and returns
@@ -29,23 +30,26 @@ def listFlag(flaglist):
         flag = setFlag(flag, index, item)
     return flag
 
+
 def setFlag(flagbyte, pos, status):
     """
     Sets the bit at 'pos' to 'status', and
     returns the modified flagbyte.
     """
     if status:
-        return flagbyte | 2**pos
+        return flagbyte | 2 ** pos
     else:
-        return flagbyte & ~2**pos
+        return flagbyte & ~2 ** pos
+
 
 def getFlag(flagbyte, pos):
     """
     Returns the bit at 'pos' in 'flagbyte'
     """
-    mask = 2**pos
+    mask = 2 ** pos
     result = flagbyte & mask
     return (result == mask)
+
 
 def getPositions(mask):
     """
@@ -60,7 +64,8 @@ def getPositions(mask):
         if int(c):
             result.append(index)
     return result
-    
+
+
 def getFlags(flagbyte, *positions):
     """
     Returns the bits specified in the arguments

@@ -1,6 +1,3 @@
-import byteflag
-from CTF_ByteIO import ByteIO
-from Chunks.Movements import Movements
 from Chunks.ObjectInfo import *
 from Chunks.Transitions import FadeIn, FadeOut
 from Loader import DataLoader
@@ -120,7 +117,7 @@ class QuickBackdrop(DataLoader, _Background):
         self.width = self.reader.read_int32()
         self.height = self.reader.read_int32()
 
-        if size<12+16:
+        if size < 12 + 16:
             return
         self.shape = Shape(self.reader, width=self.width,
                            height=self.height)

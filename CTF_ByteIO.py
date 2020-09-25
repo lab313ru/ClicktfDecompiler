@@ -248,16 +248,15 @@ class ByteIO:
     def write_double(self, value):
         self.write('d', value)
 
-    def write_ascii_string(self, string,size = 0, zero_terminated=True):
+    def write_ascii_string(self, string, size=0, zero_terminated=True):
         entry = self.tell()
         for c in string:
             self._write(c.encode('ascii'))
         if zero_terminated:
             self._write(b'\x00')
-        if size and self.tell()-entry<size:
-            bytes_written = self.tell()-entry
-            self._write(b'\x00'*(size-bytes_written))
-
+        if size and self.tell() - entry < size:
+            bytes_written = self.tell() - entry
+            self._write(b'\x00' * (size - bytes_written))
 
     def write_fourcc(self, fourcc):
         self.write_ascii_string(fourcc)
@@ -297,8 +296,8 @@ class ByteIO:
     def check(self, size):
         return self.size() - self.tell() >= size
 
-    def write_fmt(self,fmt, data):
-        self.write(fmt,data)
+    def write_fmt(self, fmt, data):
+        self.write(fmt, data)
 
 
 if __name__ == '__main__':

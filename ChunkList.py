@@ -3,17 +3,13 @@ import traceback
 from enum import IntEnum
 from typing import List
 
-
-
 import Decryption
 from CTF_Constants import *
 from ChunkViewer import ChunkViewer
 from Chunks.AppHeader import AppHeader, ExtendedHeader
 from Chunks.AppMenu import AppMenu
 from Chunks.ExternalData import ExtData, OtherExtensions, ExtensionList
-from Chunks.FontBank import FontBank
-from Chunks.Frame import Frame, FramePassword, FrameName, FrameHandles, FrameHeader, FramePalette, VirtualSize, Layers, \
-    ObjectInstances
+from Chunks.Frame import Frame, FrameName, FrameHandles, FrameHeader, VirtualSize, Layers
 from Chunks.FrameItems import FrameItems
 from Chunks.ImageBank import ImageBank
 from Chunks.MusicBank import MusicBank
@@ -23,9 +19,8 @@ from Chunks.Protection import Protection
 from Chunks.SecNum import SecNum
 from Chunks.SoundBank import SoundBank
 from Chunks.StringChunks import *
-from Chunks.Transitions import FadeIn,FadeOut
+from Chunks.Transitions import FadeIn, FadeOut
 from Chunks.yves import BinaryFiles, AppIcon
-from Chunks.Events import Events
 from Loader import DataLoader
 from Utils import prettier_size
 
@@ -98,7 +93,7 @@ class Chunk(DataLoader):
             if not decrypter:
                 print('NO DECRYPTOR DEFINED ERROR')
                 raise Exception('NO DECRYPTOR DEFINED')
-            chunk_data = decrypter.decode(reader.read_bytes(self.size),self.size,as_reader = True)
+            chunk_data = decrypter.decode(reader.read_bytes(self.size), self.size, as_reader=True)
             self.decompressed_size = len(chunk_data)
 
         elif self.raw_flag == ChunkFlags.COMPRESSED_AND_ENCRYPTED:
@@ -106,8 +101,8 @@ class Chunk(DataLoader):
             if not decrypter:
                 print('NO DECRYPTOR DEFINED ERROR')
                 raise Exception('NO DECRYPTOR DEFINED')
-            chunk_data = decrypter.decode_mode3(reader.read_bytes(self.size),self.size,self.id,as_reader=True)
-            self.decompressed_size =len(chunk_data)
+            chunk_data = decrypter.decode_mode3(reader.read_bytes(self.size), self.size, self.id, as_reader=True)
+            self.decompressed_size = len(chunk_data)
 
         elif self.raw_flag == ChunkFlags.COMPRESSED:
             chunk_data = reader.auto_decompress(True)
@@ -135,7 +130,6 @@ class Chunk(DataLoader):
         if self.chunk_list.get_chunk(EditorFilename):
             self.build_key()
 
-
     def load(self):
         try:
             self.loader.read()
@@ -144,10 +138,8 @@ class Chunk(DataLoader):
             print(traceback.print_exc())
             input('Press enter to continue...')
 
-
     def __repr__(self):
         return f'<Chunk {self.name} size:{self.size} flag:{self.flag.name}>'
-
 
     def print(self):
         print(f'Chunk {self.name}:')
@@ -158,7 +150,6 @@ class Chunk(DataLoader):
         print(f'    DECOMPRESSED SIZE: {self.decompressed_size}')
         print(f'    Pretty SIZE: {prettier_size(self.size)}')
         print(f'    Pretty DECOMPRESSED SIZE: {prettier_size(self.decompressed_size)}')
-
 
     def print_chunk_data(self):
         if self.settings.get('PRINTCHUNKS', False) and hasattr(self.loader, 'print'):
@@ -182,7 +173,7 @@ class ChunkList(DataLoader):
         self.reader = reader
         self.verbose = True
         self.chunks = []  # type: List[Chunk]
-        self.read_later = [] # type: List[Chunk]
+        self.read_later = []  # type: List[Chunk]
 
     def interactive_mode(self):
         if self.settings.get('INTERACTIVECHUNKS', False) and self.get_chunks_to_watch() == []:
@@ -244,7 +235,7 @@ chunk_loaders = {
     8741: AppAuthor,
     8742: AppMenu,
     8743: ExtPath,
-    #8745: FrameItems,  # FrameItems
+    # 8745: FrameItems,  # FrameItems
     8747: FrameHandles,  # FrameHandles
     8748: ExtData,  # ExtData
     8750: EditorFilename,  # AppEditorFilename
@@ -279,7 +270,7 @@ chunk_loaders = {
     # 13114: 'createPreservingLoader()',  # FrameFadeOutFrame
     13115: FadeIn,  # FrameFadeIn
     13116: FadeOut,  # FrameFadeOut
-    #13117: Events,  # FrameEvents
+    # 13117: Events,  # FrameEvents
     # 13118: 'createPreservingLoader()',  # FramePlayHeader
     # 13119: 'createPreservingLoader()',  # Additional_FrameItem
     # 13120: 'createPreservingLoader()',  # Additional_FrameItemInstance
@@ -303,7 +294,7 @@ chunk_loaders = {
     21847: SoundOffsets,  # SoundsOffsets
     21848: MusicOffsets,  # MusicsOffsets
     26214: ImageBank,  # Images
-    #26215: FontBank,
+    # 26215: FontBank,
     26216: SoundBank,
     26217: MusicBank,  # Musics
     # 32639: last.Last,  # Last

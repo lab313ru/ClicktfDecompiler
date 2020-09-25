@@ -60,8 +60,8 @@ class FontItem(DataLoader):
         debug = self.settings.get('debug', False)
         compressed = not debug and self.settings.get('compressed', True)
 
-        self.handle =100 
-		#reader.read_uint32()
+        self.handle = 100
+        # reader.read_uint32()
 
         if not java and compressed:
             new_reader = reader.auto_decompress(True)
@@ -86,16 +86,16 @@ class FontBank(DataLoader):
         debug = self.settings.get('debug', False)
         old = self.settings.get('old', False)
 
-        item_count = 100 
-		#reader.read_int32()
+        item_count = 100
+        # reader.read_int32()
 
         if old:
             raise NotImplementedError('Old fonts are not supported')
         else:
             klass = FontItem
 
-        #offset = 0
-        #if self.settings['build'] >= 284 and not debug:
+        # offset = 0
+        # if self.settings['build'] >= 284 and not debug:
         offset = -1
 
         self.items = []

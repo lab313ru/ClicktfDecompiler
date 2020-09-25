@@ -16,24 +16,22 @@
 # along with Anaconda.  If not, see <http://www.gnu.org/licenses/>.
 
 import tempfile
-from Mfa import (MFA, MFA_CURRENT_VERSION, ValueList, ValueItem,
-    ChunkList, Frame, Events, Layer, FrameItem, FrameInstance,
-    FRAME_ITEM_LOADERS, EXTENSION_BASE, ExtensionObject, Movements,
-    Behaviours, Transition, Animation, AnimationDirection, ItemFolder, Movement,
-    EventObject, FRAME_ITEM_TYPE, Paragraph, SYSTEM_ITEM_TYPE)
-#from Chunks.FontBank import FontBank
-from Chunks.SoundBank import SoundBank
-from Chunks.MusicBank import MusicBank
-from Chunks.ImageBank import AGMIBank
-from Chunks.Controls import Controls, PlayerControl
+
 from Bytereader import ByteReader
-from Chunks.ObjectInfo import (PLAYER, KEYBOARD, CREATE,
-    TIMER, GAME, SPEAKER, SYSTEM, QUICKBACKDROP, BACKDROP, ACTIVE, TEXT,
-    QUESTION, SCORE, LIVES, COUNTER, RTF, SUBAPPLICATION, objectTypes)
-from Chunks.Frame import  * #NONE_PARENT
-from Chunks.Objects import HIDDEN
-from Chunks.Loaders import Group, GroupPointer
 from Checksum import make_group_checksum
+from Chunks.Controls import Controls, PlayerControl
+from Chunks.Frame import *  # NONE_PARENT
+# from Chunks.FontBank import FontBank
+from Chunks.ImageBank import AGMIBank
+from Chunks.ObjectInfo import (QUICKBACKDROP, BACKDROP, TEXT,
+                               QUESTION, SCORE, LIVES, COUNTER, RTF, SUBAPPLICATION)
+from Chunks.Objects import HIDDEN
+from Mfa import (ValueList, ValueItem,
+                 ChunkList, Frame, Events, Layer, FrameItem, FrameInstance,
+                 FRAME_ITEM_LOADERS, EXTENSION_BASE, ExtensionObject, Movements,
+                 Behaviours, Transition, Animation, AnimationDirection, ItemFolder, Movement,
+                 EventObject, FRAME_ITEM_TYPE, Paragraph, SYSTEM_ITEM_TYPE)
+
 
 def convert_alterables(values, kind):
     alterables = ValueList()
@@ -44,6 +42,7 @@ def convert_alterables(values, kind):
             newValue.value = item
             alterables.items.append(newValue)
     return alterables
+
 
 def convert_transition(transition):
     if transition is None:
@@ -59,8 +58,10 @@ def convert_transition(transition):
     newTransition.duration = transition.duration
     return newTransition
 
+
 def dummy_out(*arg, **kw):
     return
+
 
 class DataWrapper(object):
     def __init__(self, fp):
@@ -71,6 +72,7 @@ class DataWrapper(object):
         reader.write(self.fp.read())
         self.fp.close()
 
+
 def save_data_loader(loader):
     writer = ByteReader()
     loader.write(writer)
@@ -80,13 +82,14 @@ def save_data_loader(loader):
     fp.write(data)
     return DataWrapper(fp)
 
-def translate(game, print_func = dummy_out):
-    onepointfive = game.settings.get('old', False)
-    mfa =(ByteReader(open('template.mfa', 'rb')))
 
-    #mfa = MFA()
+def translate(game, print_func=dummy_out):
+    onepointfive = game.settings.get('old', False)
+    mfa = (ByteReader(open('template.mfa', 'rb')))
+
+    # mfa = MFA()
     mfa.frames = []
-    mfa.mfaBuild = 4 #MFA_CURRENT_VERSION
+    mfa.mfaBuild = 4  # MFA_CURRENT_VERSION
     mfa.product = game.productVersion
     mfa.buildVersion = 251
     mfa.name = game.name or ''
@@ -94,14 +97,14 @@ def translate(game, print_func = dummy_out):
     mfa.path = game.editorFilename
     mfa.stamp = 6196 * '\x00'
 
-    mfa.fonts = None #game.fonts or mfa.new(FontBank, compressed = False)
-    mfa.sounds = None #game.sounds or mfa.new(SoundBank, compressed = False)
-    mfa.music = None #game.music or mfa.new(MusicBank, compressed = False)
+    mfa.fonts = None  # game.fonts or mfa.new(FontBank, compressed = False)
+    mfa.sounds = None  # game.sounds or mfa.new(SoundBank, compressed = False)
+    mfa.music = None  # game.music or mfa.new(MusicBank, compressed = False)
     for bank in (mfa.fonts, mfa.sounds, mfa.music):
         if bank.items is None:
             continue
         for item in bank.items:
-            item.settings = {'compressed' : False}
+            item.settings = {'compressed': False}
 
     # mfa.icons = mfa.new(AGMIBank)
     images = mfa.new(AGMIBank)
@@ -147,7 +150,7 @@ def translate(game, print_func = dummy_out):
         newControl.controlType = 4
         keys = control.keys
         for key in ('up', 'down', 'left', 'right', 'button1', 'button2',
-        'button3', 'button4'):
+                    'button3', 'button4'):
             try:
                 key_value = getattr(keys, key).getValue()
             except AttributeError:
@@ -185,7 +188,7 @@ def translate(game, print_func = dummy_out):
     frameItems = {}
 
     for itemIndex, item in enumerate(game.frameItems.items):
-    # for itemIndex, item in enumerate([]):
+        # for itemIndex, item in enumerate([]):
         newItem = mfa.new(FrameItem)
         newItem.name = item.name or ('Unnamed %s' % itemIndex)
         newItem.objectType = item.objectType
@@ -364,7 +367,7 @@ def translate(game, print_func = dummy_out):
                 newLoader.height = text.height
                 question = text.items[0]
                 answer = text.items[1]
-                print (question.font)
+                print(question.font)
                 newLoader.questionFont = question.font
                 newLoader.questionColor = question.color
                 newLoader.questionFlags = 0
@@ -386,7 +389,7 @@ def translate(game, print_func = dummy_out):
         [(v, index) for (index, v) in enumerate(game.frameHandles)])
 
     for index, frame in enumerate(game.frames):
-        print ("Starting New translation")
+        print("Starting New translation")
         frame.load()
         newFrame = mfa.new(Frame)
         newFrame.handle = indexHandles[index]
@@ -402,7 +405,7 @@ def translate(game, print_func = dummy_out):
         flags['BackgroundCollisions'] = originalFlags['TotalCollisionMask']
         flags['ResizeToScreen'] = originalFlags['ResizeAtStart']
         flags['ForceLoadOnCall'] = originalFlags['ForceLoadOnCall']
-        flags['NoDisplaySurface'] = False#originalFlags['NoSurface']
+        flags['NoDisplaySurface'] = False  # originalFlags['NoSurface']
         flags['TimerBasedMovements'] = originalFlags['TimedMovements']
         newFrame.maxObjects = frame.maxObjects
         newFrame.password = frame.password or ''
@@ -435,7 +438,7 @@ def translate(game, print_func = dummy_out):
         newFrameItems = set()
         newFrame.instances = instances = []
         print_func('Now decompiler translate %r (%s)' % (newFrame.name, index))
-        print (" ")
+        print(" ")
         if frame.instances is not None:
             for instanceIndex, instance in enumerate(frame.instances.items):
                 try:
@@ -526,6 +529,7 @@ def translate(game, print_func = dummy_out):
         # group stuff
         groups = {}
         groupId = 0
+
         def loop_parameters():
             for eventGroup in frame.events.items:
                 for aceList in (eventGroup.actions, eventGroup.conditions):
@@ -535,10 +539,10 @@ def translate(game, print_func = dummy_out):
 
         for name, parameter in loop_parameters():
             if name == 'GROUP':
-                #print "loopname GROUP"
+                # print "loopname GROUP"
                 offset = parameter.offset
-                #print "offset:"
-                #print offset
+                # print "offset:"
+                # print offset
                 if onepointfive:
                     offset += 2
                 else:
@@ -550,7 +554,7 @@ def translate(game, print_func = dummy_out):
 
         for name, parameter in loop_parameters():
             if name == 'GROUPOINTER':
-                #parameter.id = groups[parameter.pointer]
+                # parameter.id = groups[parameter.pointer]
                 parameter.savedPointer = parameter.pointer = 0
 
         newFrame.chunks = mfa.new(ChunkList)

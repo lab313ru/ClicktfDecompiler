@@ -10,7 +10,6 @@ class SecNum(DataLoader):
         self.serial_slice = 0
 
     def read(self):
-
         eax = self.reader.read_int32()
         ecx = self.reader.read_int32()
 

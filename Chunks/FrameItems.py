@@ -6,13 +6,12 @@ from Loader import DataLoader
 
 class FrameItems(DataLoader):
 
-
-    def __init__(self,reader:ByteIO):
+    def __init__(self, reader: ByteIO):
         self.reader = reader
         self.itemDict = {}
         self.names = []
 
-    def read(self,):
+    def read(self, ):
         reader = self.reader
         itemDict = self.itemDict
         for _ in range(reader.read_int32()):

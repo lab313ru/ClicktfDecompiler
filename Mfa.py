@@ -16,30 +16,25 @@
 # along with Anaconda.  If not, see <http://www.gnu.org/licenses/>.
 
 from Bytereader import ByteReader, checkDefault
-from bitdict import BitDict
-from Chunks.Controls import Controls
-from Chunks.ImageBank import AGMIBank
 from Chunks.AppMenu import AppMenu
+from Chunks.Controls import Controls
 from Chunks.FontBank import FontBank
-from Chunks.SoundBank import SoundBank
+from Chunks.ImageBank import AGMIBank
+# from mmfparser.data.chunkloaders.events import EventGroup
+from Chunks.Movements import (MOVEMENT_CLASSES)
 from Chunks.MusicBank import MusicBank
-from Chunks.ObjectInfo import (PLAYER, KEYBOARD, CREATE,
-    TIMER, GAME, SPEAKER, SYSTEM, QUICKBACKDROP, BACKDROP, ACTIVE, TEXT,
-    QUESTION, SCORE, LIVES, COUNTER, RTF, SUBAPPLICATION, objectTypes,
-    EXTENSION_BASE)
-from Chunks.Objects import (LINE_SHAPE, SOLID_FILL,
-    GRADIENT_FILL, MOTIF_FILL, SUBAPPLICATION_FLAGS, OBJECT_FLAGS,
-    NEW_OBJECT_FLAGS)
-#from mmfparser.data.chunkloaders.events import EventGroup
-from Chunks.Movements import (MOVEMENT_CLASSES,
-    MOVEMENT_TYPES)
-
-from bitdict import BitDict
-import byteflag
+from Chunks.ObjectInfo import (QUICKBACKDROP, BACKDROP, ACTIVE, TEXT,
+                               QUESTION, SCORE, LIVES, COUNTER, RTF, SUBAPPLICATION, EXTENSION_BASE)
+from Chunks.Objects import (SUBAPPLICATION_FLAGS, OBJECT_FLAGS,
+                            NEW_OBJECT_FLAGS)
+from Chunks.SoundBank import SoundBank
 from Loader import DataLoader
+from bitdict import BitDict
+
 
 def make_id(value):
     return value[::-1]
+
 
 FONT_BANK = make_id('FNTA')
 IMAGE_BANK = make_id('IMGA')
@@ -65,15 +60,16 @@ BUILD_TYPES = [
 ]
 
 GRAPHIC_MODES = {
-    4 : '16 million colors',
-    7 : '65536 colors',
-    6 : '32768 colors',
-    3 : '256 colors'
+    4: '16 million colors',
+    7: '65536 colors',
+    6: '32768 colors',
+    3: '256 colors'
 }
 
 INT_TYPE = 0
 DOUBLE_TYPE = 1
 STRING_TYPE = 2
+
 
 class ValueItem(DataLoader):
     name = None
@@ -82,9 +78,9 @@ class ValueItem(DataLoader):
     def read(self, reader):
         self.name = reader.read(reader.readInt())
         type = reader.readInt()
-        if type == STRING_TYPE: # string
+        if type == STRING_TYPE:  # string
             self.value = reader.read(reader.readInt())
-        elif type == INT_TYPE: # integer
+        elif type == INT_TYPE:  # integer
             self.value = reader.readInt()
         elif type == DOUBLE_TYPE:
             self.value = reader.readDouble()
@@ -107,6 +103,7 @@ class ValueItem(DataLoader):
         else:
             raise Exception('invalid value type')
 
+
 class ValueList(DataLoader):
     items = None
 
@@ -116,12 +113,13 @@ class ValueList(DataLoader):
     def read(self, reader):
         count = reader.readInt()
         self.items = [self.new(ValueItem, reader)
-            for _ in xrange(count)]
+                      for _ in xrange(count)]
 
     def write(self, reader):
         reader.writeInt(len(self.items))
         for item in self.items:
             item.write(reader)
+
 
 # chunks
 
@@ -129,13 +127,16 @@ class StringChunk(DataLoader):
     def read(self, reader):
         self.value = reader.read(reader.readInt(True))
 
+
 class FlagChunk(DataLoader):
     def read(self, reader):
         self.flags = reader.readInt(True)
 
+
 class IntChunk(DataLoader):
     def read(self, reader):
         self.value = reader.readInt()
+
 
 # frame item chunks
 
@@ -143,10 +144,12 @@ class CounterFormat(DataLoader):
     def read(self, reader):
         self.value = reader.readShort(True)
 
+
 # application chunks
 
 class BuildFlags(FlagChunk):
     pass
+
 
 class Filters(DataLoader):
     def read(self, reader):
@@ -156,37 +159,45 @@ class Filters(DataLoader):
             items = [reader.read(reader.readInt()) for _ in xrange(count)]
             filters.append(items)
 
+
 class Serial(DataLoader):
     def read(self, reader):
         self.serial = reader.read(12)
+
 
 class VitalizeOptions(DataLoader):
     def read(self, reader):
         self.flags = reader.readInt()
         self.allowedUrls = reader.read(reader.readInt())
 
+
 class ExecutionLevel(FlagChunk):
     pass
+
 
 class JarURL(StringChunk):
     pass
 
+
 class Opacity(IntChunk):
     pass
+
 
 class MochiAds(DataLoader):
     def read(self, reader):
         self.flags = reader.readInt(True)
         self.gameId = reader.read(reader.readInt(True))
 
+
 class ScreenOptions(DataLoader):
     def read(self, reader):
         self.tolerance = reader.readShort(True)
         self.angle = reader.readShort(True)
 
+
 class PreloaderOptions(DataLoader):
     def read(self, reader):
-        self.preloaderType = reader.readInt(True) # image = 0, app = 0
+        self.preloaderType = reader.readInt(True)  # image = 0, app = 0
         self.preloaderFile = reader.read(reader.readInt(True))
         self.x = reader.readInt()
         self.y = reader.readInt()
@@ -195,55 +206,65 @@ class PreloaderOptions(DataLoader):
         self.circleColor = reader.readColor()
         self.backgroundColor = reader.readColor()
 
+
 class MP3Options(DataLoader):
     def read(self, reader):
         self.frequency = reader.readInt(True)
         self.bitrate = reader.readInt(True)
 
+
 class FlashFonts(StringChunk):
     pass
+
 
 # frame chunks
 
 from Chunks.Common import Rectangle
 
+
 class FrameVirtualRect(Rectangle):
     pass
 
+
 class RandomSeed(IntChunk):
     pass
+
 
 class FrameOptions1(DataLoader):
     def read(self, reader):
         self.opacity = reader.readInt(True)
         self.releaseTimeout = reader.readInt(True)
 
+
 class MovementTimerBase(IntChunk):
     pass
+
 
 class FrameOptions2(IntChunk):
     pass
 
+
 CHUNK_LOADERS = {
-    23 : CounterFormat,
-    33 : FrameVirtualRect,
-    35 : RandomSeed,
-    38 : FrameOptions1,
-    39 : MovementTimerBase,
-    42 : FrameOptions2,
-    48 : BuildFlags,
-    52 : Filters,
-    56 : Serial,
-    60 : VitalizeOptions,
-    64 : ExecutionLevel,
-    68 : JarURL,
-    72 : Opacity,
-    100 : MochiAds,
-    108 : ScreenOptions,
-    116 : MP3Options,
-    118 : PreloaderOptions,
-    122 : FlashFonts
+    23: CounterFormat,
+    33: FrameVirtualRect,
+    35: RandomSeed,
+    38: FrameOptions1,
+    39: MovementTimerBase,
+    42: FrameOptions2,
+    48: BuildFlags,
+    52: Filters,
+    56: Serial,
+    60: VitalizeOptions,
+    64: ExecutionLevel,
+    68: JarURL,
+    72: Opacity,
+    100: MochiAds,
+    108: ScreenOptions,
+    116: MP3Options,
+    118: PreloaderOptions,
+    122: FlashFonts
 }
+
 
 class ChunkList(DataLoader):
     items = None
@@ -258,7 +279,7 @@ class ChunkList(DataLoader):
                 break
             data = reader.readReader(reader.readInt(True))
             if id not in CHUNK_LOADERS:
-                print ('Chunk with id', id, 'could not be loaded in', self.parent)
+                print('Chunk with id', id, 'could not be loaded in', self.parent)
                 continue
             items.append(self.new(CHUNK_LOADERS[id], data))
         size = reader.tell() - start
@@ -271,6 +292,7 @@ class ChunkList(DataLoader):
         else:
             reader.writeByte(0)
 
+
 LAYER_FLAGS = BitDict(
     'Visible',
     'Locked',
@@ -281,6 +303,7 @@ LAYER_FLAGS = BitDict(
     'WrapVertically',
     'PreviousEffect'
 )
+
 
 class Layer(DataLoader):
     name = None
@@ -298,17 +321,19 @@ class Layer(DataLoader):
         self.yCoefficient = reader.readFloat()
 
     def write(self, reader):
-        reader.writeInt(len(self.name)); reader.write(self.name)
+        reader.writeInt(len(self.name));
+        reader.write(self.name)
         reader.writeInt(self.flags.getFlags())
         reader.writeFloat(self.xCoefficient)
         reader.writeFloat(self.yCoefficient)
+
 
 class Transition(DataLoader):
     module = None
     name = None
     id = None
     transitionId = None
-    duration = None # in ms
+    duration = None  # in ms
     flags = None
     color = None
     parameterData = None
@@ -327,17 +352,22 @@ class Transition(DataLoader):
         self.parameterData = reader.read(reader.readInt())
 
     def write(self, reader):
-        reader.writeInt(len(self.module)); reader.write(self.module)
-        reader.writeInt(len(self.name)); reader.write(self.name)
+        reader.writeInt(len(self.module));
+        reader.write(self.module)
+        reader.writeInt(len(self.name));
+        reader.write(self.name)
         reader.write(self.id)
         reader.write(self.transitionId)
         reader.writeInt(self.duration)
         reader.writeInt(self.flags.getFlags())
         reader.writeColor(self.color)
-        reader.writeInt(len(self.parameterData)); reader.write(
+        reader.writeInt(len(self.parameterData));
+        reader.write(
             self.parameterData)
 
+
 MAX_QUALIFIERS = 8
+
 
 class Movement(DataLoader):
     def read(self, reader):
@@ -349,16 +379,16 @@ class Movement(DataLoader):
         if self.extension:
             newReader = reader.readReader(dataSize)
             self.loader = self.new(MOVEMENT_CLASSES[14], newReader,
-                dataSize = dataSize)
+                                   dataSize=dataSize)
         else:
             self.player = reader.readShort()
             self.type = reader.readShort()
             self.movingAtStart = reader.readByte()
-            reader.skipBytes(3) # free
+            reader.skipBytes(3)  # free
             self.directionAtStart = reader.readInt()
             newReader = reader.readReader(dataSize - 12)
             self.loader = self.new(MOVEMENT_CLASSES[self.type], newReader,
-                dataSize = dataSize - 12)
+                                   dataSize=dataSize - 12)
 
     def write(self, reader):
         reader.writeIntString(self.name)
@@ -374,6 +404,7 @@ class Movement(DataLoader):
         self.loader.write(newReader)
         reader.writeIntString(str(newReader))
 
+
 class Movements(DataLoader):
     def initialize(self):
         self.items = []
@@ -387,6 +418,7 @@ class Movements(DataLoader):
         for item in self.items:
             item.write(reader)
 
+
 class Behaviour(DataLoader):
     def read(self, reader):
         self.name = reader.read(reader.readInt(True))
@@ -395,6 +427,7 @@ class Behaviour(DataLoader):
     def write(self, reader):
         reader.writeIntString(self.name)
         reader.writeIntString(str(self.data))
+
 
 class Behaviours(DataLoader):
     def initialize(self):
@@ -409,8 +442,10 @@ class Behaviours(DataLoader):
         for item in self.items:
             item.write(reader)
 
+
 class ObjectLoader(DataLoader):
     fadeIn = fadeOut = None
+
     def initialize(self):
         self.objectFlags = OBJECT_FLAGS.copy()
         self.newObjectFlags = NEW_OBJECT_FLAGS.copy()
@@ -461,6 +496,7 @@ class ObjectLoader(DataLoader):
                 reader.writeByte(1)
                 item.write(reader)
 
+
 class AnimationDirection(DataLoader):
     def read(self, reader):
         self.index = reader.readInt(True)
@@ -469,7 +505,7 @@ class AnimationDirection(DataLoader):
         self.repeat = reader.readInt(True)
         self.backTo = reader.readInt(True)
         self.frames = [reader.readInt(True)
-            for _ in xrange(reader.readInt(True))]
+                       for _ in xrange(reader.readInt(True))]
 
     def write(self, reader):
         reader.writeInt(self.index, True)
@@ -481,13 +517,15 @@ class AnimationDirection(DataLoader):
         for item in self.frames:
             reader.writeInt(item)
 
+
 class Animation(DataLoader):
     name = None
+
     def read(self, reader):
         self.name = reader.read(reader.readInt(True))
         directionCount = reader.readInt(True)
         self.directions = [self.new(AnimationDirection, reader)
-            for _ in xrange(directionCount)]
+                           for _ in xrange(directionCount)]
 
     def write(self, reader):
         reader.writeIntString(self.name or '')
@@ -495,14 +533,16 @@ class Animation(DataLoader):
         for item in self.directions:
             item.write(reader)
 
+
 class AnimationObject(ObjectLoader):
     items = None
+
     def read(self, reader):
         ObjectLoader.read(self, reader)
         if reader.readByte() != 0:
             animationCount = reader.readInt(True)
             self.items = [self.new(Animation, reader)
-                for _ in xrange(animationCount)]
+                          for _ in xrange(animationCount)]
 
     def write(self, reader):
         ObjectLoader.write(self, reader)
@@ -514,6 +554,7 @@ class AnimationObject(ObjectLoader):
             for item in self.items:
                 item.write(reader)
 
+
 class BackgroundLoader(DataLoader):
     def read(self, reader):
         self.obstacleType = reader.readInt(True)
@@ -522,6 +563,7 @@ class BackgroundLoader(DataLoader):
     def write(self, reader):
         reader.writeInt(self.obstacleType, True)
         reader.writeInt(self.collisionType, True)
+
 
 class ExtensionObject(AnimationObject):
     def read(self, reader):
@@ -534,7 +576,7 @@ class ExtensionObject(AnimationObject):
             self.subType = reader.read(reader.readInt(True))
         newReader = reader.readReader(reader.readInt(True))
         dataSize = newReader.readInt() - 20
-        newReader.skipBytes(4) # maxSize
+        newReader.skipBytes(4)  # maxSize
         self.extensionVersion = newReader.readInt()
         self.extensionId = newReader.readInt()
         self.extensionPrivate = newReader.readInt()
@@ -556,12 +598,14 @@ class ExtensionObject(AnimationObject):
         reader.writeInt(self.extensionPrivate)
         reader.write(self.extensionData)
 
+
 class Active(AnimationObject):
     def read(self, reader):
         AnimationObject.read(self, reader)
 
     def write(self, reader):
         AnimationObject.write(self, reader)
+
 
 class Backdrop(BackgroundLoader):
     def read(self, reader):
@@ -572,9 +616,11 @@ class Backdrop(BackgroundLoader):
         BackgroundLoader.write(self, reader)
         reader.writeInt(self.handle)
 
+
 SHAPE_FLAGS = BitDict(
     'Woo'
 )
+
 
 class QuickBackdrop(BackgroundLoader):
     def initialize(self):
@@ -607,14 +653,16 @@ class QuickBackdrop(BackgroundLoader):
         reader.writeInt(self.flags.getFlags(), True)
         reader.writeInt(self.image)
 
+
 class Paragraph(DataLoader):
     def read(self, reader):
         self.value = reader.read(reader.readInt(True))
-        self.flags = reader.readInt(True) # is answer?
+        self.flags = reader.readInt(True)  # is answer?
 
     def write(self, reader):
         reader.writeIntString(self.value)
         reader.writeInt(self.flags, True)
+
 
 class Text(ObjectLoader):
     def read(self, reader):
@@ -626,7 +674,7 @@ class Text(ObjectLoader):
         self.flags = reader.readInt(True)
         checkDefault(reader, reader.readInt(True), 0)
         self.items = [self.new(Paragraph, reader)
-            for _ in xrange(reader.readInt(True))]
+                      for _ in xrange(reader.readInt(True))]
 
     def write(self, reader):
         ObjectLoader.write(self, reader)
@@ -640,6 +688,7 @@ class Text(ObjectLoader):
         for item in self.items:
             item.write(reader)
 
+
 class QuestionObject(ObjectLoader):
     def read(self, reader):
         ObjectLoader.read(self, reader)
@@ -648,16 +697,16 @@ class QuestionObject(ObjectLoader):
         self.questionFont = reader.readInt(True)
         self.questionColor = reader.readColor()
         checkDefault(reader, reader.readInt(True), 37)
-        self.questionFlags = reader.readInt(True) # add relief?
-        checkDefault(reader, reader.readInt(True), 1) # question count?
+        self.questionFlags = reader.readInt(True)  # add relief?
+        checkDefault(reader, reader.readInt(True), 1)  # question count?
         self.question = reader.read(reader.readInt(True))
         checkDefault(reader, reader.readInt(True), 0)
         self.answerFont = reader.readInt(True)
         self.answerColor = reader.readColor()
         checkDefault(reader, reader.readInt(True), 37)
-        self.answerFlags = reader.readInt(True) # add relief?
+        self.answerFlags = reader.readInt(True)  # add relief?
         self.items = [self.new(Paragraph, reader)
-            for _ in xrange(reader.readInt(True))]
+                      for _ in xrange(reader.readInt(True))]
 
     def write(self, reader):
         ObjectLoader.write(self, reader)
@@ -679,6 +728,7 @@ class QuestionObject(ObjectLoader):
         for item in self.items:
             item.write(reader)
 
+
 class Counter(ObjectLoader):
     def read(self, reader):
         ObjectLoader.read(self, reader)
@@ -694,7 +744,7 @@ class Counter(ObjectLoader):
         self.width = reader.readInt()
         self.height = reader.readInt()
         self.images = [reader.readInt(True)
-            for _ in xrange(reader.readInt(True))]
+                       for _ in xrange(reader.readInt(True))]
         self.font = reader.readInt(True)
 
     def write(self, reader):
@@ -715,12 +765,13 @@ class Counter(ObjectLoader):
             reader.writeInt(item, True)
         reader.writeInt(self.font, True)
 
+
 class Score(ObjectLoader):
     def read(self, reader):
         ObjectLoader.read(self, reader)
         self.player = reader.readInt(True)
         self.images = [reader.readInt(True)
-            for _ in xrange(reader.readInt(True))]
+                       for _ in xrange(reader.readInt(True))]
         self.displayType = reader.readInt(True)
         self.flags = reader.readInt(True)
         self.font = reader.readInt(True)
@@ -738,13 +789,14 @@ class Score(ObjectLoader):
         reader.writeInt(self.font, True)
         reader.writeInt(self.width)
         reader.writeInt(self.height)
+
 
 class Lives(ObjectLoader):
     def read(self, reader):
         ObjectLoader.read(self, reader)
         self.player = reader.readInt(True)
         self.images = [reader.readInt(True)
-            for _ in xrange(reader.readInt(True))]
+                       for _ in xrange(reader.readInt(True))]
         self.displayType = reader.readInt(True)
         self.flags = reader.readInt(True)
         self.font = reader.readInt(True)
@@ -762,6 +814,7 @@ class Lives(ObjectLoader):
         reader.writeInt(self.font, True)
         reader.writeInt(self.width)
         reader.writeInt(self.height)
+
 
 class RTFObject(ObjectLoader):
     def read(self, reader):
@@ -771,6 +824,7 @@ class RTFObject(ObjectLoader):
         self.flags = reader.readInt(True)
         self.color = reader.readColor()
         self.value = reader.read(reader.readInt(True))
+
 
 class SubApplication(ObjectLoader):
     def initialize(self):
@@ -786,7 +840,7 @@ class SubApplication(ObjectLoader):
         self.startFrame = reader.readInt()
         if self.startFrame != -1:
             if reader.readInt() != -1:
-                print ('subapp NO')
+                print('subapp NO')
 
     def write(self, reader):
         ObjectLoader.write(self, reader)
@@ -798,17 +852,18 @@ class SubApplication(ObjectLoader):
         if self.startFrame != -1:
             reader.writeInt(-1)
 
+
 FRAME_ITEM_LOADERS = {
-    ACTIVE : Active,
-    BACKDROP : Backdrop,
-    QUICKBACKDROP : QuickBackdrop,
-    TEXT : Text,
-    QUESTION : QuestionObject,
-    COUNTER : Counter,
-    SCORE : Score,
-    LIVES : Lives,
-    RTF : RTFObject,
-    SUBAPPLICATION : SubApplication
+    ACTIVE: Active,
+    BACKDROP: Backdrop,
+    QUICKBACKDROP: QuickBackdrop,
+    TEXT: Text,
+    QUESTION: QuestionObject,
+    COUNTER: Counter,
+    SCORE: Score,
+    LIVES: Lives,
+    RTF: RTFObject,
+    SUBAPPLICATION: SubApplication
 }
 
 ITEM_FLAGS = BitDict(
@@ -816,6 +871,7 @@ ITEM_FLAGS = BitDict(
     None,
     'Global'
 )
+
 
 class FrameItem(DataLoader):
     def initialize(self):
@@ -845,7 +901,8 @@ class FrameItem(DataLoader):
     def write(self, reader):
         reader.writeInt(self.objectType)
         reader.writeInt(self.handle)
-        reader.writeInt(len(self.name)); reader.write(self.name)
+        reader.writeInt(len(self.name));
+        reader.write(self.name)
         reader.writeInt(int(self.transparent))
         reader.writeInt(self.inkEffect)
         reader.writeInt(self.inkEffectParameter, True)
@@ -856,14 +913,16 @@ class FrameItem(DataLoader):
         self.chunks.write(reader)
         self.loader.write(reader)
 
+
 class ItemFolder(DataLoader):
     name = None
+
     def read(self, reader):
         value = reader.readInt(True)
-        if value == 0x70000004: # folder
+        if value == 0x70000004:  # folder
             self.name = reader.read(reader.readInt(True))
             self.items = [reader.readInt(True)
-                for _ in xrange(reader.readInt(True))]
+                          for _ in xrange(reader.readInt(True))]
         else:
             self.name = None
             self.items = [reader.readInt(True)]
@@ -877,6 +936,7 @@ class ItemFolder(DataLoader):
             reader.writeInt(len(self.items))
         for item in self.items:
             reader.writeInt(item, True)
+
 
 class FrameInstance(DataLoader):
     def read(self, reader):
@@ -899,6 +959,7 @@ class FrameInstance(DataLoader):
         reader.writeInt(self.itemHandle, True)
         reader.writeInt(self.parentHandle, True)
 
+
 class Comment(DataLoader):
     def read(self, reader):
         self.handle = reader.readInt(True)
@@ -908,10 +969,12 @@ class Comment(DataLoader):
         reader.writeInt(self.handle, True)
         reader.writeIntString(self.value)
 
+
 FRAME_ITEM_TYPE = 1
 SHORTCUT_ITEM_TYPE = 2
 SYSTEM_ITEM_TYPE = 3
 ICON_BUFFER_CODE = 'OIC2'
+
 
 class EventObject(DataLoader):
     def read(self, reader):
@@ -948,6 +1011,7 @@ class EventObject(DataLoader):
         if self.objectType == SYSTEM_ITEM_TYPE:
             reader.writeShort(self.systemQualifier, True)
 
+
 EVENT_DATA = 'Evts'
 COMMENT_DATA = 'Rems'
 OBJECT_DATA = 'EvOb'
@@ -958,6 +1022,7 @@ EDITOR_POSITION_DATA = 'EvTs'
 EDITOR_LINE_DATA = 'EvLs'
 EVENT_END = make_id('END!')
 
+
 class Events(DataLoader):
     items = None
     comments = None
@@ -965,6 +1030,7 @@ class Events(DataLoader):
     objectTypes = None
     x = None
     lineY = None
+
     def read(self, reader):
         self.version = reader.readShort(True)
         self.frameType = reader.readShort(True)
@@ -981,13 +1047,13 @@ class Events(DataLoader):
             elif name == COMMENT_DATA:
                 try:
                     self.comments = [self.new(Comment, reader)
-                        for _ in xrange(reader.readInt(True))]
+                                     for _ in xrange(reader.readInt(True))]
                 except OverflowError:
                     import code
-                    code.interact(local = locals())
+                    code.interact(local=locals())
             elif name == OBJECT_DATA:
                 self.objects = [self.new(EventObject, reader)
-                    for _ in xrange(reader.readInt(True))]
+                                for _ in xrange(reader.readInt(True))]
             elif name == EVENT_EDITOR_DATA:
                 reader.skipBytes(4)
                 self.conditionWidth = reader.readShort(True)
@@ -998,14 +1064,14 @@ class Events(DataLoader):
                 if count == -1:
                     realCount = reader.readShort()
                 self.objectTypes = [reader.readShort(True)
-                    for _ in xrange(realCount)]
+                                    for _ in xrange(realCount)]
                 self.objectHandles = [reader.readShort(True)
-                    for _ in xrange(realCount)]
+                                      for _ in xrange(realCount)]
                 self.objectFlags = [reader.readShort(True)
-                    for _ in xrange(realCount)]
+                                    for _ in xrange(realCount)]
                 if count == -1:
                     self.folders = [reader.read(reader.readInt(True))
-                        for _ in xrange(reader.readShort(True))]
+                                    for _ in xrange(reader.readShort(True))]
                 else:
                     self.folders = []
             elif name == TIME_LIST_DATA:
@@ -1029,7 +1095,7 @@ class Events(DataLoader):
                 break
             else:
                 raise NotImplementedError('%s is an unknown event identifier' %
-                    name)
+                                          name)
 
     def write(self, reader):
         reader.writeShort(self.version, True)
@@ -1079,6 +1145,7 @@ class Events(DataLoader):
             reader.writeInt(self.eventLineY, True)
         reader.write(EVENT_END)
 
+
 class Frame(DataLoader):
     handle = None
     name = None
@@ -1089,6 +1156,7 @@ class Frame(DataLoader):
     palette = None
     fadeIn = None
     fadeOut = None
+
     def initialize(self):
         self.palette = []
         self.flags = BitDict(
@@ -1120,14 +1188,14 @@ class Frame(DataLoader):
         self.lastViewedY = reader.readInt()
 
         self.palette = [reader.readColor()
-            for _ in xrange(reader.readInt())]
+                        for _ in xrange(reader.readInt())]
 
         self.stampHandle = reader.readInt()
 
         self.activeLayer = reader.readInt()
 
         self.layers = [self.new(Layer, reader)
-            for _ in xrange(reader.readInt())]
+                       for _ in xrange(reader.readInt())]
 
         if reader.readByte() != 0:
             self.fadeIn = self.new(Transition, reader)
@@ -1136,24 +1204,27 @@ class Frame(DataLoader):
             self.fadeOut = self.new(Transition, reader)
 
         self.items = items = [self.new(FrameItem, reader)
-            for _ in xrange(reader.readInt())]
+                              for _ in xrange(reader.readInt())]
 
         self.folders = [self.new(ItemFolder, reader)
-            for _ in xrange(reader.readInt(True))]
+                        for _ in xrange(reader.readInt(True))]
 
         self.instances = [self.new(FrameInstance, reader)
-            for _ in xrange(reader.readInt())]
+                          for _ in xrange(reader.readInt())]
         self.events = self.new(Events, reader)
         self.chunks = self.new(ChunkList, reader)
 
     def write(self, reader):
         reader.writeInt(self.handle)
-        reader.writeInt(len(self.name)); reader.write(self.name)
-        reader.writeInt(self.size[0]); reader.writeInt(self.size[1])
+        reader.writeInt(len(self.name));
+        reader.write(self.name)
+        reader.writeInt(self.size[0]);
+        reader.writeInt(self.size[1])
         reader.writeColor(self.background)
         reader.writeInt(self.flags.getFlags(), True)
         reader.writeInt(self.maxObjects)
-        reader.writeInt(len(self.password)); reader.write(self.password)
+        reader.writeInt(len(self.password));
+        reader.write(self.password)
         reader.writeInt(0)
         reader.writeInt(self.lastViewedX)
         reader.writeInt(self.lastViewedY)
@@ -1179,11 +1250,12 @@ class Frame(DataLoader):
         self.events.write(reader)
         self.chunks.write(reader)
 
+
 PRODUCTS = {
-    1 : 'TGF',
-    2 : 'MMF2 Standard',
-    3 : 'MMF2 Developer',
-    4 : 'DeluxeGoldEdition'
+    1: 'TGF',
+    2: 'MMF2 Standard',
+    3: 'MMF2 Developer',
+    4: 'DeluxeGoldEdition'
 }
 
 MFA_CURRENT_VERSION = 5
@@ -1222,6 +1294,7 @@ GRAPHIC_SETTINGS = BitDict(
     'NoDebugger',
     'NoSubappSharing'
 )
+
 
 class MFA(DataLoader):
     mfaVersion = None
@@ -1296,13 +1369,13 @@ class MFA(DataLoader):
 
         if reader.read(4) != FONT_BANK:
             raise Exception('invalid font bank name')
-        self.fonts = self.new(FontBank, reader, compressed = False)
+        self.fonts = self.new(FontBank, reader, compressed=False)
         if reader.read(4) != SOUND_BANK:
             raise Exception('invalid sound bank name')
-        self.sounds = self.new(SoundBank, reader, compressed = False)
+        self.sounds = self.new(SoundBank, reader, compressed=False)
         if reader.read(4) != MUSIC_BANK:
             raise Exception('invalid music bank name')
-        self.music = self.new(MusicBank, reader, compressed = False)
+        self.music = self.new(MusicBank, reader, compressed=False)
         if reader.read(4) != IMAGE_BANK:
             raise Exception('invalid icon bank name')
         self.icons = self.new(AGMIBank, reader)
@@ -1336,7 +1409,7 @@ class MFA(DataLoader):
         checkDefault(reader, reader.readInt(), 0)
 
         self.binaryFiles = [reader.read(reader.readInt())
-            for _ in xrange(reader.readInt())]
+                            for _ in xrange(reader.readInt())]
 
         self.controls = self.new(Controls, reader)
 
@@ -1360,7 +1433,7 @@ class MFA(DataLoader):
         self.graphicMode = reader.readInt()
 
         self.iconImages = [reader.readInt()
-            for _ in xrange(reader.readInt())]
+                           for _ in xrange(reader.readInt())]
 
         self.customQualifiers = qualifiers = []
         for _ in xrange(reader.readInt()):
@@ -1378,7 +1451,7 @@ class MFA(DataLoader):
             self.extensions.append((handle, filename, name, magic, subType))
 
         frameOffsets = [reader.readInt()
-            for _ in xrange(reader.readInt())]
+                        for _ in xrange(reader.readInt())]
         nextOffset = reader.readInt()
 
         for offset in frameOffsets:
@@ -1442,7 +1515,8 @@ class MFA(DataLoader):
         reader.writeColor(self.borderColor)
         reader.writeInt(self.displaySettings.getFlags())
         reader.writeInt(self.graphicSettings.getFlags())
-        reader.writeInt(len(self.helpFile)); reader.write(self.helpFile)
+        reader.writeInt(len(self.helpFile));
+        reader.write(self.helpFile)
         reader.writeInt(len(self.vitalizePreview))
         reader.write(self.vitalizePreview)
         reader.writeInt(self.initialScore, True)
@@ -1484,7 +1558,8 @@ class MFA(DataLoader):
         reader.writeInt(len(self.customQualifiers))
         for item in self.customQualifiers:
             name, handle = item
-            reader.writeInt(len(name)); reader.write(name)
+            reader.writeInt(len(name));
+            reader.write(name)
             reader.writeInt(handle)
         reader.writeInt(len(self.extensions))
         for item in self.extensions:
